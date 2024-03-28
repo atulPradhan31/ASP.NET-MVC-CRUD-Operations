@@ -25,7 +25,7 @@ namespace ServiceContracts
         /// </summary>
         /// <param name="countryID">Nullable country_id of Guid type</param>
         /// <returns>An object of CountryResponse for matching Guid</returns>
-        CountryResponse GetCountryByCountryID(Guid? countryID);
+        CountryResponse? GetCountryByCountryID(Guid? countryID);
 
     }
 }

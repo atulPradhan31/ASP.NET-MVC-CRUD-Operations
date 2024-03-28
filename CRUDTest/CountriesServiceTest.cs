@@ -20,7 +20,7 @@ namespace CRUDTest
         public void AddCountry_NullCountry()
         {
             //Arrange
-            CountryAddRequest request = null;
+            CountryAddRequest? request = null;
 
             //Assert
             Assert.Throws<ArgumentNullException>(() =>
