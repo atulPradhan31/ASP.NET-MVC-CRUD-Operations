@@ -1,5 +1,5 @@
-﻿using ServiceContracts;
-using ServiceContracts.DTO;
+﻿using ServiceContracts.DTO;
+using ServiceContracts;
 using Services;
 
 namespace CRUDTest
@@ -8,14 +8,14 @@ namespace CRUDTest
     {
         private readonly ICountriesService _countriesService;
 
-        //Constructor
+        //constructor
         public CountriesServiceTest()
         {
-            _countriesService = new CountriesService();
+            _countriesService = new CountriesService(false);
         }
 
-        #region AddCountry Test Block
-        //Case 1: When CountryAddRequest is null
+        #region AddCountry
+        //When CountryAddRequest is null, it should throw ArgumentNullException
         [Fact]
         public void AddCountry_NullCountry()
         {
@@ -30,12 +30,12 @@ namespace CRUDTest
             });
         }
 
-        //Case 2: When CountryName is null
+        //When the CountryName is null, it should throw ArgumentException
         [Fact]
-        public void AddCountry_NullCountryName()
+        public void AddCountry_CountryNameIsNull()
         {
             //Arrange
-            CountryAddRequest request = new CountryAddRequest() { CountryName = null };
+            CountryAddRequest? request = new CountryAddRequest() { CountryName = null };
 
             //Assert
             Assert.Throws<ArgumentException>(() =>
@@ -43,104 +43,119 @@ namespace CRUDTest
                 //Act
                 _countriesService.AddCountry(request);
             });
-
         }
 
-        // Case 3: When country names are duplicate
+
+        //When the CountryName is duplicate, it should throw ArgumentException
         [Fact]
         public void AddCountry_DuplicateCountryName()
         {
             //Arrange
-            CountryAddRequest request1 = new CountryAddRequest() { CountryName = "Bharat" };
-            CountryAddRequest request2 = new CountryAddRequest() { CountryName = "Bharat" };
+            CountryAddRequest? request1 = new CountryAddRequest() { CountryName = "USA" };
+            CountryAddRequest? request2 = new CountryAddRequest() { CountryName = "USA" };
 
             //Assert
             Assert.Throws<ArgumentException>(() =>
             {
+                //Act
                 _countriesService.AddCountry(request1);
                 _countriesService.AddCountry(request2);
             });
         }
 
-        //Case 4: When inputs are correct
+
+        //When you supply proper country name, it should insert (add) the country to the existing list of countries
         [Fact]
-        public void AddCountry_ValidInput()
+        public void AddCountry_ProperCountryDetails()
         {
             //Arrange
-            CountryAddRequest request = new CountryAddRequest() { CountryName = "India" };
+            CountryAddRequest? request = new CountryAddRequest() { CountryName = "Japan" };
 
             //Act
             CountryResponse response = _countriesService.AddCountry(request);
-
-            List<CountryResponse> actualResponse = _countriesService.GetAllCountries();
+            List<CountryResponse> countries_from_GetAllCountries = _countriesService.GetAllCountries();
 
             //Assert
             Assert.True(response.CountryID != Guid.Empty);
-            Assert.Contains(response, actualResponse);
+            Assert.Contains(response, countries_from_GetAllCountries);
         }
 
         #endregion
 
 
-        #region Get All Countries
+        #region GetAllCountries
 
-        //Case 1: List of the countries should be empty by default
         [Fact]
+        //The list of countries should be empty by default (before adding any countries)
         public void GetAllCountries_EmptyList()
         {
+            //Act
             List<CountryResponse> actual_country_response_list = _countriesService.GetAllCountries();
+
+            //Assert
             Assert.Empty(actual_country_response_list);
         }
 
-        //Case 2: Adding a few countries to the list
         [Fact]
         public void GetAllCountries_AddFewCountries()
         {
-            List<CountryAddRequest> requestlist = new List<CountryAddRequest>()
+            //Arrange
+            List<CountryAddRequest> country_request_list = new List<CountryAddRequest>() {
+        new CountryAddRequest() { CountryName = "USA" },
+        new CountryAddRequest() { CountryName = "UK" }
+      };
+
+            //Act
+            List<CountryResponse> countries_list_from_add_country = new List<CountryResponse>();
+
+            foreach (CountryAddRequest country_request in country_request_list)
             {
-                new CountryAddRequest() { CountryName = "Bharat" },
-                new CountryAddRequest() { CountryName = "India" },
-                new CountryAddRequest() { CountryName = "Hindustan" },
-            };
+                countries_list_from_add_country.Add(_countriesService.AddCountry(country_request));
+            }
 
-            List<CountryResponse> countryResponses = new();
+            List<CountryResponse> actualCountryResponseList = _countriesService.GetAllCountries();
 
-            foreach (CountryAddRequest request in requestlist)
-                countryResponses.Add(_countriesService.AddCountry(request));
-
-            List<CountryResponse> actualResponseList = _countriesService.GetAllCountries();
-
-            foreach (CountryResponse response in countryResponses)
-                Assert.Contains(response, actualResponseList);
-
+            //read each element from countries_list_from_add_country
+            foreach (CountryResponse expected_country in countries_list_from_add_country)
+            {
+                Assert.Contains(expected_country, actualCountryResponseList);
+            }
         }
-
         #endregion
 
 
         #region GetCountryByCountryID
 
-        //Case 1: The CountryID is null
         [Fact]
+        //If we supply null as CountryID, it should return null as CountryResponse
         public void GetCountryByCountryID_NullCountryID()
         {
-            Guid? guid = null;
-            CountryResponse response = _countriesService.GetCountryByCountryID(guid);
-            Assert.Null(response);
+            //Arrange
+            Guid? countrID = null;
+
+            //Act
+            CountryResponse? country_response_from_get_method = _countriesService.GetCountryByCountryID(countrID);
+
+
+            //Assert
+            Assert.Null(country_response_from_get_method);
         }
 
-        //Case 2: A valid countryId is passed
+
         [Fact]
+        //If we supply a valid country id, it should return the matching country details as CountryResponse object
         public void GetCountryByCountryID_ValidCountryID()
         {
-            CountryAddRequest request = new CountryAddRequest() { CountryName = "Japan" };
-            CountryResponse response = _countriesService.AddCountry(request);
+            //Arrange
+            CountryAddRequest? country_add_request = new CountryAddRequest() { CountryName = "China" };
+            CountryResponse country_response_from_add = _countriesService.AddCountry(country_add_request);
 
-            CountryResponse countryByGetMethod = _countriesService.GetCountryByCountryID(response.CountryID);
+            //Act
+            CountryResponse? country_response_from_get = _countriesService.GetCountryByCountryID(country_response_from_add.CountryID);
 
-            Assert.Equal(response, countryByGetMethod);
+            //Assert
+            Assert.Equal(country_response_from_add, country_response_from_get);
         }
-
         #endregion
     }
 }
