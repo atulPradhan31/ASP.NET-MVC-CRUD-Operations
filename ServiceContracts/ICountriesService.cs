@@ -2,30 +2,30 @@
 
 namespace ServiceContracts
 {
+  /// <summary>
+  /// Represents business logic for manipulating Country entity
+  /// </summary>
+  public interface ICountriesService
+  {
     /// <summary>
-    /// Represents buisness login for manipulation country entity
+    /// Adds a country object to the list of countries
     /// </summary>
-    public interface ICountriesService
-    {
-        /// <summary>
-        /// Adds a country object to the list of the countries
-        /// </summary>
-        /// <param name="countryAddRequest">Country object to add</param>
-        /// <returns>Returns the country object after adding it (including the newly generated country id)</returns>
-        public CountryResponse AddCountry(CountryAddRequest? countryAddRequest);
+    /// <param name="countryAddRequest">Country object to add</param>
+    /// <returns>Returns the country object after adding it (including newly generated country id)</returns>
+    CountryResponse AddCountry(CountryAddRequest? countryAddRequest);
 
-        /// <summary>
-        /// Returns a list of all countries
-        /// </summary>
-        /// <returns>Returns a list of countries as object of CountryResponse</returns>
-        List<CountryResponse> GetAllCountries();
+    /// <summary>
+    /// Returns all countries from the list
+    /// </summary>
+    /// <returns>All countries from the list as List of CountryResponse</CountryResponse></returns>
+    List<CountryResponse> GetAllCountries();
 
-        /// <summary>
-        /// Get a country by country_id
-        /// </summary>
-        /// <param name="countryID">Nullable country_id of Guid type</param>
-        /// <returns>An object of CountryResponse for matching Guid</returns>
-        CountryResponse? GetCountryByCountryID(Guid? countryID);
 
-    }
+    /// <summary>
+    /// Returns a country object based on the given country id
+    /// </summary>
+    /// <param name="countryID">CountryID (guid) to search</param>
+    /// <returns>Matching country as CountryResponse object</returns>
+    CountryResponse? GetCountryByCountryID(Guid? countryID);
+  }
 }

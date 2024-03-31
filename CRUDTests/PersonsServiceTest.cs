@@ -1,12 +1,16 @@
-﻿using ServiceContracts;
-using Entities;
+﻿using Entities;
+using Microsoft.EntityFrameworkCore;
+using ServiceContracts;
 using ServiceContracts.DTO;
-using Services;
 using ServiceContracts.Enums;
+using Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 using Xunit.Abstractions;
 
-
-namespace CRUDTest
+namespace CRUDTests
 {
     public class PersonsServiceTest
     {
@@ -18,8 +22,9 @@ namespace CRUDTest
         //constructor
         public PersonsServiceTest(ITestOutputHelper testOutputHelper)
         {
-            _personService = new PersonsService(false);
-            _countriesService = new CountriesService(false);
+            _countriesService = new CountriesService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options));
+
+            _personService = new PersonsService(new PersonsDbContext(new DbContextOptionsBuilder<PersonsDbContext>().Options), _countriesService);
             _testOutputHelper = testOutputHelper;
         }
 
@@ -361,7 +366,8 @@ namespace CRUDTest
             PersonUpdateRequest? person_update_request = null;
 
             //Assert
-            Assert.Throws<ArgumentNullException>(() => {
+            Assert.Throws<ArgumentNullException>(() =>
+            {
                 //Act
                 _personService.UpdatePerson(person_update_request);
             });
@@ -376,7 +382,8 @@ namespace CRUDTest
             PersonUpdateRequest? person_update_request = new PersonUpdateRequest() { PersonID = Guid.NewGuid() };
 
             //Assert
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 //Act
                 _personService.UpdatePerson(person_update_request);
             });
@@ -400,7 +407,8 @@ namespace CRUDTest
 
 
             //Assert
-            Assert.Throws<ArgumentException>(() => {
+            Assert.Throws<ArgumentException>(() =>
+            {
                 //Act
                 _personService.UpdatePerson(person_update_request);
             });
